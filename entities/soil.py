@@ -217,7 +217,6 @@ class SoilLayer:
         for index_row, row in enumerate(self.grid):
             for index_col, cell in enumerate(row):
                 if "X" in cell:
-
                     # tile options
                     t = "X" in self.grid[index_row - 1][index_col]
                     b = "X" in self.grid[index_row + 1][index_col]

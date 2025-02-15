@@ -74,7 +74,6 @@ class Particle(BaseSprite):
 
 class Water(BaseSprite):
     def __init__(self, pos: Tuple[int, int], group: GroupParam, z: int) -> None:
-
         self.animation = Animation(
             {"water": [image for image in import_folder(WATER_ANIMATIONS)]},
             start_status="water",
