@@ -6,7 +6,7 @@ from pygame import QUIT, KEYDOWN, MOUSEBUTTONDOWN
 from pygame.locals import DOUBLEBUF
 
 from game_state import StateManager
-from game_state.errors import ExitGameError, ExitStateError
+from game_state.errors import ExitGame, ExitState
 
 from core.settings import Display
 from states import GAME_STATES
@@ -39,7 +39,7 @@ class Main:
         while True:
             try:
                 self.state_manager.run_state()
-            except ExitStateError:
+            except ExitState:
                 # Stuff you can do before a state is going to be changed / reset.
                 pass
 
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     try:
         game = Main()
         game.run()
-    except ExitGameError:
+    except ExitGame:
         pygame.quit()
