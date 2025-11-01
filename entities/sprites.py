@@ -1,10 +1,10 @@
-import pygame
 import random
+from typing import TYPE_CHECKING, Literal, Sequence, Tuple, TypeAlias, Union
 
-from typing import Tuple, Union, Sequence, TypeAlias, Literal, TYPE_CHECKING
+import pygame
 
-from core.settings import WATER_ANIMATIONS, APPLE_POS, LAYERS
-from core.utils import Animation, Timer, import_folder, get_path
+from core.settings import APPLE_POS, LAYERS, WATER_ANIMATIONS
+from core.utils import Animation, Timer, get_path, import_folder
 
 if TYPE_CHECKING:
     from entities.player import Player
@@ -13,7 +13,9 @@ else:
     class Player: ...
 
 
-GroupParam: TypeAlias = Union[pygame.sprite.Group, Sequence[pygame.sprite.Group]]
+GroupParam: TypeAlias = Union[
+    pygame.sprite.Group, Sequence[pygame.sprite.Group]
+]
 
 
 class BaseSprite(pygame.sprite.Sprite):
@@ -73,7 +75,9 @@ class Particle(BaseSprite):
 
 
 class Water(BaseSprite):
-    def __init__(self, pos: Tuple[int, int], group: GroupParam, z: int) -> None:
+    def __init__(
+        self, pos: Tuple[int, int], group: GroupParam, z: int
+    ) -> None:
         self.animation = Animation(
             {"water": [image for image in import_folder(WATER_ANIMATIONS)]},
             start_status="water",
@@ -159,13 +163,19 @@ class Tree(BaseSprite):
             self.interact_sound.play()
             self.image = self.stump_surf
             self.rect = self.image.get_rect(midbottom=self.rect.midbottom)
-            self.hitbox = self.rect.copy().inflate(-10, -self.rect.height * 0.95)
+            self.hitbox = self.rect.copy().inflate(
+                -10, -self.rect.height * 0.95
+            )
             for apple in self.apple_sprites:
                 apple.kill()
                 self.player.inventory.update_item(item="apple")
             self.player.inventory.update_item(item="wood")
             Particle(
-                self.rect.topleft, self.image, self.all_sprites, LAYERS["fruit"], 300
+                self.rect.topleft,
+                self.image,
+                self.all_sprites,
+                LAYERS["fruit"],
+                300,
             )
 
     def interact(self) -> None:

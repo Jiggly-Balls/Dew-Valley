@@ -1,19 +1,20 @@
 from __future__ import annotations
 
 import os
-import pygame
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import (
     Dict,
-    List,
-    Tuple,
-    Sequence,
-    Optional,
     Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
     TypeVar,
     Union,
 )
+
+import pygame
 
 T = TypeVar("T")
 
@@ -106,9 +107,9 @@ class Animation:
 
     def set_status(self, animation: str) -> None:
         if not self.ignore_invalid_state:
-            assert (
-                animation in self.frames
-            ), f"{animation} is not present in list of animations: {self.frames.keys()}"
+            assert animation in self.frames, (
+                f"{animation} is not present in list of animations: {self.frames.keys()}"
+            )
 
         if animation in self.frames:
             # if animation != self.status:
@@ -118,9 +119,9 @@ class Animation:
 
     def play_status(self, dt: int) -> pygame.Surface:
         if not self.ignore_invalid_state:
-            assert (
-                self.ignore_invalid_state or self.status is not None
-            ), "No animation state has been set to run"
+            assert self.ignore_invalid_state or self.status is not None, (
+                "No animation state has been set to run"
+            )
 
         self.current_frame += self.speed * dt
         if self.current_frame > self.max_frames:
@@ -129,9 +130,9 @@ class Animation:
         return self.frames[self.status][round(self.current_frame)]
 
     def play_status_ip(self, dt: int) -> None:
-        assert (
-            self.sprite is not None
-        ), "No sprite has been passed to play the status in-place."
+        assert self.sprite is not None, (
+            "No sprite has been passed to play the status in-place."
+        )
         self.current_frame += self.speed * dt
         if self.current_frame > self.max_frames:
             self.current_frame = 0

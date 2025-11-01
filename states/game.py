@@ -1,25 +1,32 @@
 import os
-import pygame
 import random
 
+import pygame
+from game_state import State
 from pytmx.util_pygame import load_pygame
 
-from game_state import State
 from core.settings import (
-    Display,
     BACKGROUND_COLOUR,
+    CHARACTER_ANIMATIONS,
     LAYERS,
     TILE_SIZE,
-    CHARACTER_ANIMATIONS,
+    Display,
 )
-from core.utils import Animation, import_folder, get_path
-from entities.player import Player, CameraGroup
+from core.utils import Animation, get_path, import_folder
 from entities.overlay import Overlay
-from entities.sprites import BaseSprite, Particle, Interaction, Water, Wildflower, Tree
-from entities.transition import Transition
-from entities.soil import SoilLayer
+from entities.player import CameraGroup, Player
 from entities.sky import Rain, Sky
+from entities.soil import SoilLayer
+from entities.sprites import (
+    BaseSprite,
+    Interaction,
+    Particle,
+    Tree,
+    Water,
+    Wildflower,
+)
 from entities.trader import Trader
+from entities.transition import Transition
 
 
 class Game(State):
@@ -40,7 +47,9 @@ class Game(State):
 
         self.player_animation = Animation(
             {
-                animation: import_folder(f"{CHARACTER_ANIMATIONS}/{animation}/")
+                animation: import_folder(
+                    f"{CHARACTER_ANIMATIONS}/{animation}/"
+                )
                 for animation in os.listdir(CHARACTER_ANIMATIONS)
             }
         )
@@ -78,7 +87,9 @@ class Game(State):
         # World Map
         BaseSprite(
             (0, 0),
-            pygame.image.load("graphics/images/world/ground.png").convert_alpha(),
+            pygame.image.load(
+                "graphics/images/world/ground.png"
+            ).convert_alpha(),
             self.all_sprites,
             LAYERS["ground"],
         )
@@ -117,7 +128,9 @@ class Game(State):
 
         # House furnitures
         for layer in ("HouseFloor", "HouseFurnitureBottom"):
-            for x, y, surface in self.tmx_data.get_layer_by_name(layer).tiles():
+            for x, y, surface in self.tmx_data.get_layer_by_name(
+                layer
+            ).tiles():
                 BaseSprite(
                     (x * TILE_SIZE, y * TILE_SIZE),
                     surface,
@@ -125,7 +138,9 @@ class Game(State):
                     LAYERS["house_bottom"],
                 )
         for layer in ("HouseWalls", "HouseFurnitureTop", "Fence"):
-            for x, y, surface in self.tmx_data.get_layer_by_name(layer).tiles():
+            for x, y, surface in self.tmx_data.get_layer_by_name(
+                layer
+            ).tiles():
                 BaseSprite(
                     (x * TILE_SIZE, y * TILE_SIZE),
                     surface,
@@ -168,7 +183,9 @@ class Game(State):
     def plant_collision(self) -> None:
         if self.soil_layer.plant_sprites:
             for plant in self.soil_layer.plant_sprites.sprites():
-                if plant.harvestable and plant.rect.colliderect(self.player.hitbox):
+                if plant.harvestable and plant.rect.colliderect(
+                    self.player.hitbox
+                ):
                     self.interact_sound.play()
                     self.player.inventory.update_item(2, plant.plant_type)
                     plant.kill()

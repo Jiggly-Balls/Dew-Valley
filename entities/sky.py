@@ -1,5 +1,6 @@
-import pygame
 import random
+
+import pygame
 
 from core.settings import *
 from core.utils import import_folder
@@ -72,7 +73,10 @@ class Rain:
     def create_floor(self) -> None:
         Drop(
             surf=random.choice(self.rain_floor),
-            pos=(random.randint(0, self.floor_w), random.randint(0, self.floor_h)),
+            pos=(
+                random.randint(0, self.floor_w),
+                random.randint(0, self.floor_h),
+            ),
             moving=False,
             groups=self.all_sprites,
             z=LAYERS["rain_floor"],
@@ -81,14 +85,19 @@ class Rain:
     def create_drops(self) -> None:
         Drop(
             surf=random.choice(self.rain_drops),
-            pos=(random.randint(0, self.floor_w), random.randint(0, self.floor_h)),
+            pos=(
+                random.randint(0, self.floor_w),
+                random.randint(0, self.floor_h),
+            ),
             moving=True,
             groups=self.all_sprites,
             z=LAYERS["rain_drops"],
         )
 
     def dim_screen(self) -> None:
-        self.display_window.fill((200, 200, 200), special_flags=pygame.BLEND_RGBA_MULT)
+        self.display_window.fill(
+            (200, 200, 200), special_flags=pygame.BLEND_RGBA_MULT
+        )
 
     def update(self) -> None:
         self.dim_screen()

@@ -1,11 +1,11 @@
-import pygame
 import random
+from typing import List, Tuple
 
+import pygame
 from pytmx.util_pygame import load_pygame
-from typing import Tuple, List
 
 from core.settings import *
-from core.utils import import_folder, import_folder_dict, get_path
+from core.utils import get_path, import_folder, import_folder_dict
 from entities.player import Player
 
 
@@ -19,7 +19,10 @@ class SoilTile(pygame.sprite.Sprite):
 
 class WaterTile(pygame.sprite.Sprite):
     def __init__(
-        self, pos: Tuple[int, int], surf: pygame.Surface, groups: pygame.sprite.Group
+        self,
+        pos: Tuple[int, int],
+        surf: pygame.Surface,
+        groups: pygame.sprite.Group,
     ) -> None:
         super().__init__(groups)
         self.image = surf
@@ -54,7 +57,8 @@ class Plant(pygame.sprite.Sprite):
         self.image = self.frames[self.age]
         self.y_offset = -16 if plant_type == "corn" else -8
         self.rect = self.image.get_rect(
-            midbottom=soil.rect.midbottom + pygame.math.Vector2(0, self.y_offset)
+            midbottom=soil.rect.midbottom
+            + pygame.math.Vector2(0, self.y_offset)
         )
         self.z = LAYERS["ground_plant"]
 
@@ -64,7 +68,9 @@ class Plant(pygame.sprite.Sprite):
 
             if int(self.age) > 0:
                 self.z = LAYERS["main"]
-                self.hitbox = self.rect.copy().inflate(-26, -self.rect.height * 0.4)
+                self.hitbox = self.rect.copy().inflate(
+                    -26, -self.rect.height * 0.4
+                )
 
             if self.age >= self.max_age:
                 self.age = self.max_age
@@ -120,7 +126,9 @@ class SoilLayer:
 
         self.grid = [[[] for col in range(h_tiles)] for row in range(v_tiles)]
         map_tmx = "graphics/data/map.tmx"
-        for x, y, _ in load_pygame(map_tmx).get_layer_by_name("Farmable").tiles():
+        for x, y, _ in (
+            load_pygame(map_tmx).get_layer_by_name("Farmable").tiles()
+        ):
             self.grid[y][x].append("F")
 
     def create_hit_rects(self) -> None:
@@ -168,7 +176,9 @@ class SoilLayer:
                     x = index_col * TILE_SIZE
                     y = index_row * TILE_SIZE
                     surf = random.choice(self.water_surfs)
-                    WaterTile((x, y), surf, [self.all_sprites, self.water_sprites])
+                    WaterTile(
+                        (x, y), surf, [self.all_sprites, self.water_sprites]
+                    )
 
     def remove_water(self) -> None:
         # destroy all water sprites
@@ -202,7 +212,11 @@ class SoilLayer:
                     self.grid[y][x].append("P")
                     Plant(
                         seed,
-                        [self.all_sprites, self.plant_sprites, self.collision_sprites],
+                        [
+                            self.all_sprites,
+                            self.plant_sprites,
+                            self.collision_sprites,
+                        ],
                         soil_sprite,
                         self.check_watered,
                     )

@@ -1,12 +1,15 @@
-import pygame
 from typing import Callable
+
+import pygame
 
 from core.settings import Display
 from entities.player import Player
 
 
 class Transition:
-    def __init__(self, reset: Callable, player: Player, window: pygame.Surface) -> None:
+    def __init__(
+        self, reset: Callable, player: Player, window: pygame.Surface
+    ) -> None:
         self.window = window
         self.reset = reset
         self.player = player
@@ -28,4 +31,6 @@ class Transition:
             self.speed = -2
 
         self.image.fill((self.color, self.color, self.color))
-        self.window.blit(self.image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        self.window.blit(
+            self.image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT
+        )

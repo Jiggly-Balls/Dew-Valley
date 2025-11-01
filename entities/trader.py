@@ -1,8 +1,8 @@
 import pygame
 
-from entities.player import Player
-from core.settings import Display, SALE_PRICES, PURCHASE_PRICES
+from core.settings import PURCHASE_PRICES, SALE_PRICES, Display
 from core.utils import Timer, get_path
+from entities.player import Player
 
 
 class Trader:
@@ -38,7 +38,9 @@ class Trader:
             self.total_height += text_surf.get_height() + (self.padding * 2)
 
         self.total_height += (len(self.text_surfs) - 1) * self.space
-        self.menu_top = Display.SCREEN_RESOLUTION[1] / 2 - self.total_height / 2
+        self.menu_top = (
+            Display.SCREEN_RESOLUTION[1] / 2 - self.total_height / 2
+        )
         self.main_rect = pygame.Rect(
             Display.SCREEN_RESOLUTION[0] / 2 - self.width / 2,
             self.menu_top,

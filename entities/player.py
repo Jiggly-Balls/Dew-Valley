@@ -1,10 +1,10 @@
+from typing import Dict, Tuple
+
 import pygame
-
 from pygame.sprite import Group
-from typing import Tuple, Dict
 
-from core.utils import Animation, Timer, ItemIterator, get_path
-from core.settings import Display, LAYERS, PLAYER_TOOL_OFFSET
+from core.settings import LAYERS, PLAYER_TOOL_OFFSET, Display
+from core.utils import Animation, ItemIterator, Timer, get_path
 from entities.sprites import BaseSprite
 
 
@@ -153,7 +153,9 @@ class Player(BaseSprite):
                 self.inventory.previous()
 
         if self.timers["tool_use"].active:
-            self.animation.set_status(f"{self.direction_str}_{self.inventory.selected}")
+            self.animation.set_status(
+                f"{self.direction_str}_{self.inventory.selected}"
+            )
 
         # Updating the player's postition
         # Horizontal movement

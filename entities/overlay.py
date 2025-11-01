@@ -1,7 +1,7 @@
 import pygame
 
-from core.settings import Display, COIN_ANIMATIONS, BG_COLOUR
-from core.utils import Animation, import_folder, import_folder_dict, get_path
+from core.settings import BG_COLOUR, COIN_ANIMATIONS, Display
+from core.utils import Animation, get_path, import_folder, import_folder_dict
 from entities.player import Player
 
 
@@ -28,7 +28,9 @@ class Overlay:
             f"{fruit_path}/apple.png"
         ).convert_alpha()
 
-        self.all_tool_rect = self.tools_surf[self.player.inventory.selected].get_rect(
+        self.all_tool_rect = self.tools_surf[
+            self.player.inventory.selected
+        ].get_rect(
             center=(
                 Display.SCREEN_RESOLUTION[0] / 1.2,
                 Display.SCREEN_RESOLUTION[1] / 1.3,
@@ -74,9 +76,9 @@ class Overlay:
 
         money_bg_surf = pygame.Surface(coin_rect.topleft)
         money_bg_surf.fill(BG_COLOUR)
-        money_bg_rect = money_bg_surf.get_rect(topleft=coin_rect.topleft).inflate(
-            20, 15
-        )
+        money_bg_rect = money_bg_surf.get_rect(
+            topleft=coin_rect.topleft
+        ).inflate(20, 15)
         self.display_surface.blit(
             money_bg_surf,
             money_bg_rect,

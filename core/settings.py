@@ -1,4 +1,5 @@
-from typing import Tuple, Union, Sequence, TypeAlias, Dict
+from typing import Dict, Sequence, Tuple, TypeAlias, Union
+
 from pygame import Vector2
 
 ColourType: TypeAlias = Union[int, str, Sequence[int]]
