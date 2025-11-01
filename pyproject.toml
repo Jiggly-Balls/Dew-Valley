@@ -4,13 +4,19 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-    "game-state==1.1.1",
-    "pygame-ce>=2.5.6",
-    "pytmx>=3.32",
-]
+dependencies = ["game-state==1.1.1", "pygame-ce>=2.5.6", "pytmx>=3.32"]
 
 [dependency-groups]
-dev = [
-    "ruff>=0.14.3",
-]
+dev = ["ruff>=0.14.3"]
+
+[tool.ruff]
+line-length = 79
+lint.extend-select = ["ANN", "I"]
+lint.ignore = ["ANN401", "F"]
+lint.fixable = ["I", "F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 72
