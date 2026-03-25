@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["game-state==1.1.1", "pygame-ce>=2.5.6", "pytmx>=3.32"]
+dependencies = [
+    "game-state==2.4.0",
+    "pygame-ce>=2.5.6",
+    "pytmx>=3.32",
+]
 
 [dependency-groups]
 dev = [
