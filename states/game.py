@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import os
 import random
+from typing import TYPE_CHECKING
 
 import pygame
-from game_state import State
-from pytmx.util_pygame import load_pygame
+import pytmx
 
 from core.settings import (
     BACKGROUND_COLOUR,
@@ -27,21 +29,27 @@ from entities.sprites import (
 )
 from entities.trader import Trader
 from entities.transition import Transition
+from states.base import BaseState
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    from pygame.sprite import Group
 
 
-class Game(State):
+class Game(BaseState):
     def __init__(self) -> None:
         super().__init__()
 
-        self.all_sprites = CameraGroup(State.window)  # type: ignore
-        self.collision_sprites = pygame.sprite.Group()
-        self.tree_sprites = pygame.sprite.Group()
-        self.interaction_sprites = pygame.sprite.Group()
+        self.all_sprites: CameraGroup = CameraGroup(BaseState.window)  # type: ignore
+        self.collision_sprites: Group[Any] = pygame.sprite.Group()
+        self.tree_sprites: Group[Any] = pygame.sprite.Group()
+        self.interaction_sprites: Group[Any] = pygame.sprite.Group()
 
-        self.sky = Sky(State.window)
-        self.rain = Rain(State.window, self.all_sprites)  # type: ignore
-        self.raining = random.randint(0, 10) > 7
-        self.soil_layer = SoilLayer(
+        self.sky: Sky = Sky(display=BaseState.window)
+        self.rain: Rain = Rain(BaseState.window, self.all_sprites)  # type: ignore
+        self.raining: bool = random.randint(0, 10) > 7
+        self.soil_layer: SoilLayer = SoilLayer(
             self.all_sprites, self.collision_sprites, self.raining
         )
 
@@ -65,9 +73,11 @@ class Game(State):
         )
         self.trader = Trader(self.player)
 
-        self.transition = Transition(self.reset, self.player, State.window)
-        self.overlay = Overlay(self.player, State.window)  # type: ignore
-        self.tmx_data = load_pygame(get_path("../graphics/data/map.tmx"))
+        self.transition = Transition(self.reset, self.player, BaseState.window)
+        self.overlay = Overlay(self.player, BaseState.window)  # type: ignore
+        self.tmx_data = pytmx.util_pygame.load_pygame(
+            get_path("../graphics/data/map.tmx")
+        )
 
         music_path = get_path("../audio/bg_music.mp3")
         self.music = pygame.mixer.Sound(music_path)
