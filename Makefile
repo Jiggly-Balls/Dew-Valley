@@ -1,3 +1,5 @@
+.PHONY: all ruff check
+
 all: ruff
 
 ruff:
