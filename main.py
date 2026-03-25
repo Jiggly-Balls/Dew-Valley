@@ -2,7 +2,6 @@ __version__ = "1.0"
 
 import pygame
 from game_state import StateManager
-from game_state.errors import ExitGame, ExitState
 from pygame import KEYDOWN, MOUSEBUTTONDOWN, QUIT
 from pygame.locals import DOUBLEBUF
 
@@ -35,7 +34,7 @@ class Main:
     def run(self) -> None:
         self.state_manager.change_state("Game")
 
-        while True:
+        while self.state_manager.is_running:
             try:
                 self.state_manager.run_state()
             except ExitState:
