@@ -49,3 +49,4 @@ reportMissingTypeStubs = false
 reportAny = false
 reportExplicitAny = false
 reportImplicitOverride = false
+reportUnusedParameter = false
