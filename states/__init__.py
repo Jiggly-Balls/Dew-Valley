@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 from states.game import Game
 
 if TYPE_CHECKING:
-    from typing import Tuple
+    from states.base import BaseState
 
-    from game_state import State
-
-GAME_STATES: Tuple[type[State], ...] = (Game,)
+GAME_STATES: tuple[type[BaseState], ...] = (Game,)
