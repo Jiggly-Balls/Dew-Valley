@@ -1,4 +1,6 @@
-__version__ = "1.0"
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pygame
 from game_state import StateManager
@@ -7,9 +9,15 @@ from pygame.locals import DOUBLEBUF
 
 from core.settings import Display
 from states import GAME_STATES
+from states.base import BaseState
 
-# icon = pygame.image.load("assets/icon.ico")
-# pygame.display.set_icon(icon)
+if TYPE_CHECKING:
+    from pygame import Surface, Clock
+
+
+__version__ = "1.0"
+
+
 pygame.mixer.init()
 pygame.init()
 pygame.display.init()
@@ -19,32 +27,31 @@ pygame.event.set_allowed((QUIT, KEYDOWN, MOUSEBUTTONDOWN))
 
 class Main:
     def __init__(self) -> None:
-        self.screen = pygame.display.set_mode(
+        self.clock: Clock = pygame.time.Clock()
+        self.screen: Surface = pygame.display.set_mode(
             Display.SCREEN_RESOLUTION, DOUBLEBUF
         )
-        self.screen.set_alpha(None)
-        self.state_manager = StateManager(self.screen)
-        self.state_manager.load_states(*GAME_STATES)
+        self.state_manager: StateManager[BaseState] = StateManager(
+            bound_state_type=BaseState, window=self.screen
+        )
 
-        # This doesn't work when converting to exe using nuitka-
-        # state_paths = get_paths("states/")
-        # for state_path in state_paths:
-        #    self.state_manager.connect_state_hook(state_path)
+        self.screen.set_alpha(None)
+        self.state_manager.load_states(*GAME_STATES)
+        
 
     def run(self) -> None:
         self.state_manager.change_state("Game")
 
-        while self.state_manager.is_running:
-            try:
-                self.state_manager.run_state()
-            except ExitState:
-                # Stuff you can do before a state is going to be changed / reset.
-                pass
+        assert self.state_manager.current_state
 
+        while self.state_manager.is_running:
+            dt = self.clock.tick(Display.FPS) / 1000
+
+            for event in pygame.event.get():
+                self.state_manager.current_state.process_event(event)
+            
+            self.state_manager.current_state.process_update(dt)
 
 if __name__ == "__main__":
-    try:
-        game = Main()
-        game.run()
-    except ExitGame:
-        pygame.quit()
+    game = Main()
+    game.run()
