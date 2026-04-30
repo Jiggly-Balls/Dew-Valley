@@ -88,7 +88,7 @@ class Animation:
         self,
         frames: dict[str, list[pygame.Surface]],
         *,
-        start_status: None | str = None,
+        start_status: str,
         sprite: None | pygame.sprite.Sprite = None,
         speed: int = 4,
         ignore_invalid_state: bool = True,
@@ -98,11 +98,10 @@ class Animation:
         self.speed: int = speed
         self.ignore_invalid_state: bool = ignore_invalid_state
 
-        self.status: None | str = None
-        self.current_frame: int = 0
+        self.status: str = start_status
+        self.current_frame: float = 0
         self.max_frames: int = 0
-        if start_status is not None:
-            self.set_status(start_status)
+        self.set_status(start_status)
 
     def get_frame(self, frame: int) -> pygame.Surface:
         return self.frames[self.status][frame]

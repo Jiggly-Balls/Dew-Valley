@@ -62,9 +62,9 @@ class Game(BaseState):
                     f"{CHARACTER_ANIMATIONS}/{animation}/"
                 )
                 for animation in os.listdir(CHARACTER_ANIMATIONS)
-            }
+            },
+            start_status="down_idle",
         )
-        self.player_animation.set_status("down_idle")
         self.player: Player = Player(
             (0, 0),
             self.player_animation,
