@@ -1,22 +1,28 @@
-from typing import Callable
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pygame
 
 from core.settings import Display
 from entities.player import Player
 
+if TYPE_CHECKING:
+    from typing import Callable
+    from pygame import Surface
+
 
 class Transition:
     def __init__(
-        self, reset: Callable, player: Player, window: pygame.Surface
+        self, reset: Callable[[], None], player: Player, window: pygame.Surface
     ) -> None:
-        self.window = window
-        self.reset = reset
-        self.player = player
+        self.window: Surface = window
+        self.reset: Callable[[], None] = reset
+        self.player: Player = player
 
-        self.image = pygame.Surface(Display.SCREEN_RESOLUTION)
-        self.color = 255
-        self.speed = -2
+        self.image: Surface = pygame.Surface(Display.SCREEN_RESOLUTION)
+        self.color: int = 255
+        self.speed: int = -2
 
     def run(self) -> None:
         self.color += self.speed
