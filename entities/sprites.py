@@ -1,36 +1,44 @@
+from __future__ import annotations
+
 import random
-from typing import TYPE_CHECKING, Literal, Sequence, Tuple, TypeAlias, Union
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 import pygame
+from pygame.rect import Rect
+from pygame.sprite import Sprite
 
 from core.settings import APPLE_POS, LAYERS, WATER_ANIMATIONS
 from core.utils import Animation, Timer, get_path, import_folder
+from entities.player import Player
 
 if TYPE_CHECKING:
+    from typing import Any
+
+    from pygame import Rect, Surface
+    from pygame.mixer import Sound
+    from pygame.sprite import Group
+
     from entities.player import Player
-else:
 
-    class Player: ...
-
-
-GroupParam: TypeAlias = Union[
-    pygame.sprite.Group, Sequence[pygame.sprite.Group]
-]
+    GroupParam: TypeAlias = (
+        pygame.sprite.Group[Any] | Sequence[pygame.sprite.Group[Any]]
+    )
 
 
 class BaseSprite(pygame.sprite.Sprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
+        pos: tuple[int, int],
         surf: pygame.Surface,
         group: GroupParam,
         z: int,
     ) -> None:
         super().__init__(group)
-        self.image = surf
-        self.rect = self.image.get_rect(topleft=pos)
-        self.z = z
-        self.hitbox = self.rect.copy().inflate(
+        self.image: Surface = surf
+        self.rect: Rect = self.image.get_rect(topleft=pos)
+        self.z: int = z
+        self.hitbox: Rect = self.rect.copy().inflate(
             -self.rect.width * 0.2, -self.rect.height * 0.75
         )
 
@@ -38,37 +46,37 @@ class BaseSprite(pygame.sprite.Sprite):
 class Interaction(BaseSprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
-        size: Tuple[int, int],
+        pos: tuple[int, int],
+        size: tuple[int, int],
         groups: GroupParam,
         z: int,
         name: str,
     ):
         surf = pygame.Surface(size)
         super().__init__(pos, surf, groups, z)
-        self.name = name
+        self.name: str = name
 
 
 class Particle(BaseSprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
-        surf: pygame.Surface,
+        pos: tuple[int, int],
+        surf: Surface,
         groups: GroupParam,
         z: int,
         duration: int = 200,
     ) -> None:
         super().__init__(pos, surf, groups, z)
-        self.start_time = pygame.time.get_ticks()
-        self.duration = duration
+        self.start_time: int = pygame.time.get_ticks()
+        self.duration: int = duration
 
         # white surface
         mask_surf = pygame.mask.from_surface(self.image)
         new_surf = mask_surf.to_surface()
         new_surf.set_colorkey((0, 0, 0))
-        self.image = new_surf
+        self.image: Surface = new_surf
 
-    def update(self, *args) -> None:
+    def update(self) -> None:
         current_time = pygame.time.get_ticks()
         if current_time - self.start_time > self.duration:
             self.kill()
@@ -76,9 +84,9 @@ class Particle(BaseSprite):
 
 class Water(BaseSprite):
     def __init__(
-        self, pos: Tuple[int, int], group: GroupParam, z: int
+        self, pos: tuple[int, int], group: GroupParam, z: int
     ) -> None:
-        self.animation = Animation(
+        self.animation: Animation = Animation(
             {"water": [image for image in import_folder(WATER_ANIMATIONS)]},
             start_status="water",
             sprite=self,
@@ -92,20 +100,22 @@ class Water(BaseSprite):
 class Wildflower(BaseSprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
+        pos: tuple[int, int],
         surf: pygame.Surface,
         groups: GroupParam,
         z: int,
     ) -> None:
         super().__init__(pos, surf, groups, z)
-        self.hitbox = self.rect.copy().inflate(-20, -self.rect.height * 0.9)
+        self.hitbox: Rect = self.rect.copy().inflate(
+            -20, -self.rect.height * 0.9
+        )
 
 
 class Tree(BaseSprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
-        surf: pygame.Surface,
+        pos: tuple[int, int],
+        surf: Surface,
         groups: GroupParam,
         z: int,
         name: Literal["Small", "Large"],
@@ -114,28 +124,30 @@ class Tree(BaseSprite):
     ) -> None:
         super().__init__(pos, surf, groups, z)
 
-        self.hitbox = self.rect.copy().inflate(
+        self.hitbox: Rect = self.rect.copy().inflate(
             -self.rect.width * 0.2, -self.rect.height * 0.9
         )
-        self.player = player
+        self.player: Player = player
 
-        self.apple_surf = pygame.image.load("graphics/images/fruit/apple.png")
-        self.apple_pos = APPLE_POS[name]
-        self.apple_sprites = pygame.sprite.Group()
-        self.all_sprites = all_sprites
-        self.max_apples = 3
+        self.apple_surf: Surface = pygame.image.load(
+            "graphics/images/fruit/apple.png"
+        )
+        self.apple_pos: tuple[tuple[int, int], ...] = APPLE_POS[name]
+        self.apple_sprites: Group[Any] = pygame.sprite.Group()
+        self.all_sprites: Sprite = all_sprites
+        self.max_apples: int = 3
 
-        self.invul_timer = Timer(200)
-        self.health = 5
-        self.stump_surf = pygame.image.load(
+        self.invul_timer: Timer = Timer(200)
+        self.health: int = 5
+        self.stump_surf: Surface = pygame.image.load(
             f"graphics/images/stumps/{name.lower()}.png"
         ).convert_alpha()
 
-        axe_sound_path = get_path("../audio/axe.mp3")
-        self.axe_sound = pygame.mixer.Sound(axe_sound_path)
+        axe_sound_path: str = get_path("../audio/axe.mp3")
+        self.axe_sound: Sound = pygame.mixer.Sound(axe_sound_path)
 
         interact_sound_path = get_path("../audio/interact.wav")
-        self.interact_sound = pygame.mixer.Sound(interact_sound_path)
+        self.interact_sound: Sound = pygame.mixer.Sound(interact_sound_path)
         self.interact_sound.set_volume(0.2)
 
         self.create_apple()
@@ -161,8 +173,8 @@ class Tree(BaseSprite):
         self.health -= 1
         if self.health == 0:
             self.interact_sound.play()
-            self.image = self.stump_surf
-            self.rect = self.image.get_rect(midbottom=self.rect.midbottom)
+            self.image: Surface = self.stump_surf
+            self.rect: Rect = self.image.get_rect(midbottom=self.rect.midbottom)
             self.hitbox = self.rect.copy().inflate(
                 -10, -self.rect.height * 0.95
             )
