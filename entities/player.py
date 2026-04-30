@@ -1,4 +1,6 @@
-from typing import Dict, Tuple
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pygame
 from pygame.sprite import Group
@@ -7,44 +9,52 @@ from core.settings import LAYERS, PLAYER_TOOL_OFFSET, Display
 from core.utils import Animation, ItemIterator, Timer, get_path
 from entities.sprites import BaseSprite
 
+if TYPE_CHECKING:
+    from typing import Any
+
+    from pygame.math import Vector2
+    from pygame.rect import Rect
+
 
 class Player(BaseSprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
+        pos: tuple[int, int],
         animation: Animation,
-        group: Group,
-        collison_sprites: Group,
-        tree_sprites: Group,
-        interaction_sprites: Group,
-        soil_layer: Group,
+        group: Group[Any],
+        collison_sprites: Group[Any],
+        tree_sprites: Group[Any],
+        interaction_sprites: Group[Any],
+        soil_layer: Group[Any],
     ) -> None:
         super().__init__(pos, animation.get_frame(0), group, LAYERS["main"])
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = self.rect.copy().inflate((-126, -70))
+        assert self.image
+
+        self.rect: Rect = self.image.get_rect(center=pos)
+        self.hitbox: Rect = self.rect.copy().inflate((-126, -70))
 
         self.collision_sprites = collison_sprites
         self.tree_sprites = tree_sprites
         self.interaction_sprites = interaction_sprites
         self.soil_layer = soil_layer
 
-        self.animation = animation
-        self.sleep = False
+        self.animation: Animation = animation
+        self.sleep: bool = False
 
         self.speed = 300
-        self.position = pygame.math.Vector2(self.rect.center)
+        self.position: Vector2 = pygame.math.Vector2(self.rect.center)
         self.direction = pygame.math.Vector2()
         self.direction_str = "down"
 
-        self.inventory = ItemIterator(
+        self.inventory: ItemIterator[str] = ItemIterator(
             ["hoe", "axe", "water", "corn", "tomato", "wood", "apple"]
         )
         self.inventory.set_item("corn", 5)
         self.inventory.set_item("tomato", 5)
-        self.money = 50
+        self.money: int = 50
 
-        self.toggle_active = False
-        self.timers: Dict[str, Timer] = {
+        self.toggle_active: bool = False
+        self.timers: dict[str, Timer] = {
             "interact": Timer(50, self.interact),
             "tool_use": Timer(500, self.use_tool),
             "tool_switch": Timer(200),

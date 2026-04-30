@@ -10,7 +10,6 @@ from pygame.sprite import Sprite
 
 from core.settings import APPLE_POS, LAYERS, WATER_ANIMATIONS
 from core.utils import Animation, Timer, get_path, import_folder
-from entities.player import Player
 
 if TYPE_CHECKING:
     from typing import Any
@@ -174,7 +173,9 @@ class Tree(BaseSprite):
         if self.health == 0:
             self.interact_sound.play()
             self.image: Surface = self.stump_surf
-            self.rect: Rect = self.image.get_rect(midbottom=self.rect.midbottom)
+            self.rect: Rect = self.image.get_rect(
+                midbottom=self.rect.midbottom
+            )
             self.hitbox = self.rect.copy().inflate(
                 -10, -self.rect.height * 0.95
             )
