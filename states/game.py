@@ -109,6 +109,8 @@ class Game(BaseState):
             LAYERS["ground"],
         )
 
+        # fmt: off
+
         for obj in self.tmx_data.get_layer_by_name("Player"):                      # pyright: ignore[reportGeneralTypeIssues, reportUnknownVariableType]
             if obj.name == "Start":                                                     # pyright: ignore[reportUnknownMemberType]
                 self.player.position.x = obj.x                                          # pyright: ignore[reportUnknownMemberType]
@@ -193,7 +195,9 @@ class Game(BaseState):
                 (x * TILE_SIZE, y * TILE_SIZE),                                    # pyright: ignore[reportUnknownArgumentType]
                 self.all_sprites,
                 LAYERS["water"],
-            )      
+            )
+
+        # fmt: on
 
     def plant_collision(self) -> None:
         if self.soil_layer.plant_sprites:
