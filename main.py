@@ -12,10 +12,10 @@ from states import GAME_STATES
 from states.base import BaseState
 
 if TYPE_CHECKING:
-    from pygame import Surface, Clock
+    from pygame import Clock, Surface
 
 
-__version__ = "2.0.0"
+__version__ = "2.1.0b"
 
 
 pygame.mixer.init()
@@ -37,7 +37,6 @@ class Main:
 
         self.screen.set_alpha(None)
         self.state_manager.load_states(*GAME_STATES)
-        
 
     def run(self) -> None:
         self.state_manager.change_state("Game")
@@ -49,8 +48,9 @@ class Main:
 
             for event in pygame.event.get():
                 self.state_manager.current_state.process_event(event)
-            
+
             self.state_manager.current_state.process_update(dt)
+
 
 if __name__ == "__main__":
     game = Main()
