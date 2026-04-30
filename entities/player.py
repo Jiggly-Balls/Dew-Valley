@@ -87,7 +87,7 @@ class Player(BaseSprite):
             self.timers["seed_use"].activate()
             self.direction = pygame.math.Vector2()
 
-    def use_seed(self):
+    def use_seed(self) -> None:
         if self.inventory.inv[self.inventory.selected] > 0:
             self.soil_layer.plant_seed(
                 self.get_target_pos(), self.inventory.selected, self
@@ -215,7 +215,7 @@ class Player(BaseSprite):
 
 
 class CameraGroup(Group[BaseSprite]):
-    def __init__(self, window: Surface):
+    def __init__(self, window: Surface) -> None:
         super().__init__()
         self.window: Surface = window
         self.offset: Vector2 = pygame.math.Vector2()

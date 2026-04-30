@@ -27,7 +27,7 @@ class SoilTile(pygame.sprite.Sprite):
         pos: tuple[int, int],
         surf: Surface,
         groups: list[Group[SoilTile] | CameraGroup],
-    ):
+    ) -> None:
         super().__init__(groups)
         self.image: Surface = surf
         self.rect: Rect = self.image.get_rect(topleft=pos)
