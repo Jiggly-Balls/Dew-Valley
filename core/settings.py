@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import TypeAlias
 from collections.abc import Sequence
+from typing import TypeAlias
 
 from pygame import Vector2
 
