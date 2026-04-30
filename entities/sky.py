@@ -15,7 +15,7 @@ class Sky:
         self.end_color = (38, 101, 189)
         self.day_speed = 1.2
 
-    def display(self, dt: int) -> None:
+    def display(self, dt: float) -> None:
         for index, value in enumerate(self.end_color):
             if self.start_color[index] > value:
                 self.start_color[index] -= self.day_speed * dt

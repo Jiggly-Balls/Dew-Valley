@@ -119,7 +119,7 @@ class Animation:
             # self.current_frame = 0
             self.max_frames = len(self.frames[self.status]) - 1
 
-    def play_status(self, dt: int) -> pygame.Surface:
+    def play_status(self, dt: float) -> pygame.Surface:
         if not self.ignore_invalid_state:
             assert self.ignore_invalid_state or self.status is not None, (
                 "No animation state has been set to run"

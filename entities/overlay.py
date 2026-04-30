@@ -1,4 +1,5 @@
 import pygame
+from pygame.surface import Surface
 
 from core.settings import BG_COLOUR, COIN_ANIMATIONS, Display
 from core.utils import Animation, get_path, import_folder, import_folder_dict
@@ -37,8 +38,8 @@ class Overlay:
             )
         )
 
-    def draw(self, dt: int) -> None:
-        tool_surf = self.tools_surf[self.player.inventory.selected]
+    def draw(self, dt: float) -> None:
+        tool_surf: Surface = self.tools_surf[self.player.inventory.selected]
         tool_rect = tool_surf.get_rect(
             center=(
                 Display.SCREEN_RESOLUTION[0] / 1.2,
