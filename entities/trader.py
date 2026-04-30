@@ -1,36 +1,50 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import pygame
 
 from core.settings import PURCHASE_PRICES, SALE_PRICES, Display
 from core.utils import Timer, get_path
 from entities.player import Player
 
+if TYPE_CHECKING:
+    from pygame import Font, Rect, Surface
+
 
 class Trader:
     def __init__(self, player: Player) -> None:
         # general setup
-        self.player = player
-        self.display_surface = pygame.display.get_surface()
-        font_path = get_path("../graphics/LycheeSoda.ttf")
-        self.font = pygame.font.Font(font_path, 30)
+        self.player: Player = player
+        self.display_surface: Surface | None = pygame.display.get_surface()
+        font_path: str = get_path("../graphics/LycheeSoda.ttf")
+        self.font: Font = pygame.font.Font(font_path, 30)
 
         # options
-        self.width = 400
-        self.space = 10
-        self.padding = 8
+        self.width: int = 400
+        self.space: int = 10
+        self.padding: int = 8
 
         # entries
-        self.options = ["wood", "apple", "corn", "tomato", "corn", "tomato"]
-        self.sell_border = 3
+        self.options: list[str] = [
+            "wood",
+            "apple",
+            "corn",
+            "tomato",
+            "corn",
+            "tomato",
+        ]
+        self.sell_border: int = 3
         self.setup()
 
         # movement
-        self.index = 0
-        self.timer = Timer(200)
+        self.index: int = 0
+        self.timer: Timer = Timer(200)
 
     def setup(self) -> None:
         # create text surfaces
-        self.text_surfs = []
-        self.total_height = 0
+        self.text_surfs: list[Any] = []
+        self.total_height: int = 0
 
         for item in self.options:
             text_surf = self.font.render(item, False, "Black")
@@ -38,10 +52,10 @@ class Trader:
             self.total_height += text_surf.get_height() + (self.padding * 2)
 
         self.total_height += (len(self.text_surfs) - 1) * self.space
-        self.menu_top = (
+        self.menu_top: float = (
             Display.SCREEN_RESOLUTION[1] / 2 - self.total_height / 2
         )
-        self.main_rect = pygame.Rect(
+        self.main_rect: Rect = pygame.Rect(
             Display.SCREEN_RESOLUTION[0] / 2 - self.width / 2,
             self.menu_top,
             self.width,
@@ -49,8 +63,8 @@ class Trader:
         )
 
         # buy / sell surface
-        self.buy_text = self.font.render("buy", False, "Black")
-        self.sell_text = self.font.render("sell", False, "Black")
+        self.buy_text: Surface = self.font.render("buy", False, "Black")
+        self.sell_text: Surface = self.font.render("sell", False, "Black")
 
     def input(self) -> None:
         keys = pygame.key.get_pressed()
@@ -96,9 +110,15 @@ class Trader:
             self.index = 0
 
     def show_entry(
-        self, text_surf: pygame.Surface, amount: int, top: int, selected: str
+        self,
+        text_surf: pygame.Surface,
+        amount: str | int,
+        top: int,
+        selected: bool,
     ) -> None:
         # background
+        assert self.display_surface
+
         bg_rect = pygame.Rect(
             self.main_rect.left,
             top,
@@ -121,7 +141,6 @@ class Trader:
         )
         self.display_surface.blit(amount_surf, amount_rect)
 
-        # selected
         if selected:
             pygame.draw.rect(self.display_surface, "black", bg_rect, 4, 4)
             if self.index <= self.sell_border:  # buy

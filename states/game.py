@@ -249,7 +249,7 @@ class Game(BaseState):
                 self.rain.dim_screen()
             self.trader.update()
         else:
-            self.all_sprites.update(dt)
+            self.all_sprites.update(dt=dt)
             self.plant_collision()
 
             if self.raining:
