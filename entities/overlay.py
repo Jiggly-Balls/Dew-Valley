@@ -1,21 +1,27 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame
-from pygame.surface import Surface
 
 from core.settings import BG_COLOUR, COIN_ANIMATIONS, Display
 from core.utils import Animation, get_path, import_folder, import_folder_dict
 from entities.player import Player
 
+if TYPE_CHECKING:
+    from pygame import Font, Rect, Surface
+
 
 class Overlay:
     def __init__(self, player: Player, display: pygame.Surface) -> None:
-        self.display_surface = display
-        self.player = player
-        self.font = pygame.font.Font(
+        self.display_surface: Surface = display
+        self.player: Player = player
+        self.font: Font = pygame.font.Font(
             get_path(r"..\graphics\LycheeSoda.ttf"),
             30,
         )
 
-        self.coin_animation = Animation(
+        self.coin_animation: Animation = Animation(
             {"coin": [image for image in import_folder(COIN_ANIMATIONS)]},
             start_status="coin",
             speed=10,
@@ -24,12 +30,14 @@ class Overlay:
         overlay_path = get_path("../graphics/images/overlay/")
         fruit_path = get_path("../graphics/images/fruit")
 
-        self.tools_surf = import_folder_dict(get_path(overlay_path))
+        self.tools_surf: dict[str, Surface] = import_folder_dict(
+            get_path(overlay_path)
+        )
         self.tools_surf["apple"] = pygame.image.load(
             f"{fruit_path}/apple.png"
         ).convert_alpha()
 
-        self.all_tool_rect = self.tools_surf[
+        self.all_tool_rect: Rect = self.tools_surf[
             self.player.inventory.selected
         ].get_rect(
             center=(
