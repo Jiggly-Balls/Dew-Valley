@@ -1,13 +1,16 @@
-from typing import Dict, Sequence, Tuple, TypeAlias, Union
+from __future__ import annotations
+
+from typing import TypeAlias
+from collections.abc import Sequence
 
 from pygame import Vector2
 
-ColourType: TypeAlias = Union[int, str, Sequence[int]]
+ColourType: TypeAlias = int | str | Sequence[int]
 
 
 class Display:
-    SCREEN_RESOLUTION: Tuple[int, int] = (1280, 720)
-    ALL_RESOLUTIONS: Tuple[Tuple[int, int], ...] = (
+    SCREEN_RESOLUTION: tuple[int, int] = (1280, 720)
+    ALL_RESOLUTIONS: tuple[tuple[int, int], ...] = (
         (1920, 1080),  # recheck
         (1600, 900),  # ok
         (1366, 768),  # ok
@@ -21,7 +24,7 @@ TILE_SIZE: int = 64
 
 BACKGROUND_COLOUR: ColourType = "black"
 
-LAYERS: Dict[str, int] = {
+LAYERS: dict[str, int] = {
     "water": 0,
     "ground": 1,
     "soil": 2,
@@ -35,14 +38,14 @@ LAYERS: Dict[str, int] = {
     "rain_drops": 10,
 }
 
-PLAYER_TOOL_OFFSET: Dict[str, Vector2] = {
+PLAYER_TOOL_OFFSET: dict[str, Vector2] = {
     "left": Vector2(-50, 40),
     "right": Vector2(50, 40),
     "up": Vector2(0, -10),
     "down": Vector2(0, 50),
 }
 
-APPLE_POS: Dict[str, Tuple[Tuple[int, int], ...]] = {
+APPLE_POS: dict[str, tuple[tuple[int, int], ...]] = {
     "Small": ((18, 17), (30, 37), (12, 50), (30, 45), (20, 30), (30, 10)),
     "Large": ((30, 24), (50, 65), (50, 50), (16, 40), (45, 50), (42, 70)),
 }
@@ -60,4 +63,4 @@ PURCHASE_PRICES = {"corn": 6, "tomato": 7}
 CHARACTER_ANIMATIONS: str = "graphics/images/character"
 WATER_ANIMATIONS: str = "graphics/images/water"
 COIN_ANIMATIONS: str = "graphics/images/coin"
-BG_COLOUR: Tuple[int, int, int] = (200, 200, 200)
+BG_COLOUR: tuple[int, int, int] = (200, 200, 200)
