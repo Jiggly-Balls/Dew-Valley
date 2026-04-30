@@ -9,6 +9,7 @@ from entities.player import Player
 
 if TYPE_CHECKING:
     from typing import Callable
+
     from pygame import Surface
 
 
