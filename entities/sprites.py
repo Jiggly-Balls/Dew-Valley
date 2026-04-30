@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Literal, TypeAlias
 
 import pygame
 from pygame.rect import Rect
-from pygame.sprite import Sprite
 
 from core.settings import APPLE_POS, LAYERS, WATER_ANIMATIONS
 from core.utils import Animation, Timer, get_path, import_folder
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
     from pygame.mixer import Sound
     from pygame.sprite import Group
 
-    from entities.player import Player
+    from entities.player import CameraGroup, Player
 
     GroupParam: TypeAlias = (
         pygame.sprite.Group[Any] | Sequence[pygame.sprite.Group[Any]]
@@ -29,7 +28,7 @@ class BaseSprite(pygame.sprite.Sprite):
     def __init__(
         self,
         pos: tuple[int, int],
-        surf: pygame.Surface,
+        surf: Surface,
         group: GroupParam,
         z: int,
     ) -> None:
@@ -61,7 +60,7 @@ class Particle(BaseSprite):
         self,
         pos: tuple[int, int],
         surf: Surface,
-        groups: GroupParam,
+        groups: CameraGroup,
         z: int,
         duration: int = 200,
     ) -> None:
@@ -118,7 +117,7 @@ class Tree(BaseSprite):
         groups: GroupParam,
         z: int,
         name: Literal["Small", "Large"],
-        all_sprites: pygame.sprite.Sprite,
+        all_sprites: CameraGroup,
         player: Player,
     ) -> None:
         super().__init__(pos, surf, groups, z)
@@ -133,7 +132,7 @@ class Tree(BaseSprite):
         )
         self.apple_pos: tuple[tuple[int, int], ...] = APPLE_POS[name]
         self.apple_sprites: Group[Any] = pygame.sprite.Group()
-        self.all_sprites: Sprite = all_sprites
+        self.all_sprites: CameraGroup = all_sprites
         self.max_apples: int = 3
 
         self.invul_timer: Timer = Timer(200)
