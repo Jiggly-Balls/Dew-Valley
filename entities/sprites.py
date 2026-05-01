@@ -49,7 +49,7 @@ class Interaction(BaseSprite):
         groups: GroupParam,
         z: int,
         name: str,
-    ):
+    ) -> None:
         surf = pygame.Surface(size)
         super().__init__(pos, surf, groups, z)
         self.name: str = name

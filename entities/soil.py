@@ -255,51 +255,51 @@ class SoilLayer:
             for index_col, cell in enumerate(row):
                 if "X" in cell:
                     # tile options
-                    t = "X" in self.grid[index_row - 1][index_col]
-                    b = "X" in self.grid[index_row + 1][index_col]
-                    r = "X" in row[index_col + 1]
-                    l = "X" in row[index_col - 1]
+                    top = "X" in self.grid[index_row - 1][index_col]
+                    bottom = "X" in self.grid[index_row + 1][index_col]
+                    right = "X" in row[index_col + 1]
+                    left = "X" in row[index_col - 1]
 
                     tile_type = "o"
 
                     # all sides
-                    if all((t, r, b, l)):
+                    if all((top, right, bottom, left)):
                         tile_type = "x"
 
                     # horizontal tiles only
-                    if l and not any((t, r, b)):
+                    if left and not any((top, right, bottom)):
                         tile_type = "r"
-                    if r and not any((t, l, b)):
+                    if right and not any((top, left, bottom)):
                         tile_type = "l"
-                    if r and l and not any((t, b)):
+                    if right and left and not any((top, bottom)):
                         tile_type = "lr"
 
                     # vertical only
-                    if t and not any((r, l, b)):
+                    if top and not any((right, left, bottom)):
                         tile_type = "b"
-                    if b and not any((r, l, t)):
+                    if bottom and not any((right, left, top)):
                         tile_type = "t"
-                    if b and t and not any((r, l)):
+                    if bottom and top and not any((right, left)):
                         tile_type = "tb"
 
                     # corners
-                    if l and b and not any((t, r)):
+                    if left and bottom and not any((top, right)):
                         tile_type = "tr"
-                    if r and b and not any((t, l)):
+                    if right and bottom and not any((top, left)):
                         tile_type = "tl"
-                    if l and t and not any((b, r)):
+                    if left and top and not any((bottom, right)):
                         tile_type = "br"
-                    if r and t and not any((b, l)):
+                    if right and top and not any((bottom, left)):
                         tile_type = "bl"
 
                     # T shapes
-                    if all((t, b, r)) and not l:
+                    if all((top, bottom, right)) and not left:
                         tile_type = "tbr"
-                    if all((t, b, l)) and not r:
+                    if all((top, bottom, left)) and not right:
                         tile_type = "tbl"
-                    if all((l, r, t)) and not b:
+                    if all((left, right, top)) and not bottom:
                         tile_type = "lrb"
-                    if all((l, r, b)) and not t:
+                    if all((left, right, bottom)) and not top:
                         tile_type = "lrt"
 
                     SoilTile(
