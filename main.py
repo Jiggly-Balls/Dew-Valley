@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from pygame import Clock, Surface
 
 
-__version__ = "2.1.0b"
+__version__ = "2.0.0"
 
 
 pygame.mixer.init()
