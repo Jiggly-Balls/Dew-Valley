@@ -5,7 +5,7 @@ description = "A stardew valley rip off made in Python using Pygame"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "game-state==2.4.0",
+    "game-state>=2.4.1",
     "pygame-ce>=2.5.6",
     "pytmx>=3.32",
 ]
