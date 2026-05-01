@@ -44,13 +44,13 @@ class Game(BaseState):
     def __init__(self) -> None:
         super().__init__()
 
-        self.all_sprites: CameraGroup = CameraGroup(BaseState.window)  # type: ignore
+        self.all_sprites: CameraGroup = CameraGroup(BaseState.window)
         self.collision_sprites: Group[Any] = pygame.sprite.Group()
         self.tree_sprites: Group[Any] = pygame.sprite.Group()
         self.interaction_sprites: Group[Any] = pygame.sprite.Group()
 
         self.sky: Sky = Sky(display=BaseState.window)
-        self.rain: Rain = Rain(BaseState.window, self.all_sprites)  # type: ignore
+        self.rain: Rain = Rain(BaseState.window, self.all_sprites)
         self.raining: bool = random.randint(0, 10) > 7
         self.soil_layer: SoilLayer = SoilLayer(
             self.all_sprites, self.collision_sprites, self.raining
@@ -79,7 +79,7 @@ class Game(BaseState):
         self.transition: Transition = Transition(
             self.reset, self.player, BaseState.window
         )
-        self.overlay: Overlay = Overlay(self.player, BaseState.window)  # type: ignore
+        self.overlay: Overlay = Overlay(self.player, BaseState.window)
         self.tmx_data: TiledMap = load_pygame(
             get_path("../graphics/data/map.tmx")
         )
@@ -110,6 +110,7 @@ class Game(BaseState):
         )
 
         # fmt: off
+        # The pytmx library doesn't have great typing support...
 
         for obj in self.tmx_data.get_layer_by_name("Player"):                      # pyright: ignore[reportGeneralTypeIssues, reportUnknownVariableType]
             if obj.name == "Start":                                                     # pyright: ignore[reportUnknownMemberType]
@@ -125,19 +126,19 @@ class Game(BaseState):
                     obj.name,
                 )
 
-            elif obj.name == "Trader":                                                  # pyright: ignore[reportUnknownMemberType]
+            elif obj.name == "Trader":                                                 # pyright: ignore[reportUnknownMemberType]
                 Interaction(
-                    (obj.x, obj.y),                                                 # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
-                    (obj.width, obj.height),                                       # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+                    (obj.x, obj.y),                                                # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+                    (obj.width, obj.height),                                      # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
                     self.interaction_sprites,
                     LAYERS["main"],
                     obj.name,
                 )
 
         # Collision tiles
-        for x, y, _ in self.tmx_data.get_layer_by_name("Collision").tiles():       # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        for x, y, _ in self.tmx_data.get_layer_by_name("Collision").tiles():      # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
             BaseSprite(
-                (x * TILE_SIZE, y * TILE_SIZE),                                     # pyright: ignore[reportUnknownArgumentType]
+                (x * TILE_SIZE, y * TILE_SIZE),                                    # pyright: ignore[reportUnknownArgumentType]
                 pygame.Surface((TILE_SIZE, TILE_SIZE)),
                 self.collision_sprites,
                 LAYERS["main"],
