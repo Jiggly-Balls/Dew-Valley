@@ -1,66 +1,83 @@
+from __future__ import annotations
+
 import random
-from typing import List, Tuple
+from typing import TYPE_CHECKING
 
 import pygame
-from pytmx.util_pygame import load_pygame
+from pytmx.util_pygame import (
+    load_pygame,  # pyright: ignore[reportUnknownVariableType]
+)
 
 from core.settings import *
 from core.utils import get_path, import_folder, import_folder_dict
-from entities.player import Player
+from entities.player import CameraGroup, Player
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Literal
+
+    from pygame import Rect, Sound, Surface
+    from pygame.sprite import Group
+
+    from entities.player import CameraGroup
 
 
 class SoilTile(pygame.sprite.Sprite):
-    def __init__(self, pos, surf, groups):
+    def __init__(
+        self,
+        pos: tuple[int, int],
+        surf: Surface,
+        groups: list[Group[SoilTile] | CameraGroup],
+    ) -> None:
         super().__init__(groups)
-        self.image = surf
-        self.rect = self.image.get_rect(topleft=pos)
-        self.z = LAYERS["soil"]
+        self.image: Surface = surf
+        self.rect: Rect = self.image.get_rect(topleft=pos)
+        self.z: int = LAYERS["soil"]
 
 
 class WaterTile(pygame.sprite.Sprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
-        surf: pygame.Surface,
-        groups: pygame.sprite.Group,
+        pos: tuple[int, int],
+        surf: Surface,
+        groups: list[Group[WaterTile] | CameraGroup],
     ) -> None:
         super().__init__(groups)
-        self.image = surf
-        self.rect = self.image.get_rect(topleft=pos)
-        self.z = LAYERS["soil_water"]
+        self.image: Surface = surf
+        self.rect: Rect = self.image.get_rect(topleft=pos)
+        self.z: int = LAYERS["soil_water"]
 
 
 class Plant(pygame.sprite.Sprite):
     def __init__(
         self,
         plant_type: str,
-        groups: List[pygame.sprite.Group],
-        soil,
-        check_watered: bool,
+        groups: list[Group[Plant] | CameraGroup],
+        soil: SoilTile,
+        check_watered: Callable[[tuple[int, int]], bool],
     ) -> None:
         super().__init__(groups)
-        self.plant_type = plant_type
+        self.plant_type: str = plant_type
 
         # setup
         plant_path = f"graphics/images/fruit/{plant_type}"
-        self.frames = import_folder(plant_path)
-        self.soil = soil
-        self.check_watered = check_watered
+        self.frames: list[Surface] = import_folder(plant_path)
+        self.soil: SoilTile = soil
+        self.check_watered: Callable[[tuple[int, int]], bool] = check_watered
 
         # plant growing
-        self.age = 0
-        self.max_age = len(self.frames) - 1
-        self.grow_speed = GROW_SPEED[plant_type]
-        self.harvestable = False
+        self.age: int | float = 0
+        self.max_age: int = len(self.frames) - 1
+        self.grow_speed: int | float = GROW_SPEED[plant_type]
+        self.harvestable: bool = False
 
         # sprite setup
-        self.image = self.frames[self.age]
-        self.y_offset = -16 if plant_type == "corn" else -8
-        self.rect = self.image.get_rect(
+        self.image: Surface = self.frames[self.age]
+        self.y_offset: Literal[-16, -8] = -16 if plant_type == "corn" else -8
+        self.rect: Rect = self.image.get_rect(
             midbottom=soil.rect.midbottom
             + pygame.math.Vector2(0, self.y_offset)
         )
-        self.z = LAYERS["ground_plant"]
+        self.z: int = LAYERS["ground_plant"]
 
     def grow(self) -> None:
         if self.check_watered(self.rect.center):
@@ -68,7 +85,7 @@ class Plant(pygame.sprite.Sprite):
 
             if int(self.age) > 0:
                 self.z = LAYERS["main"]
-                self.hitbox = self.rect.copy().inflate(
+                self.hitbox: Rect = self.rect.copy().inflate(
                     -26, -self.rect.height * 0.4
                 )
 
@@ -86,34 +103,38 @@ class Plant(pygame.sprite.Sprite):
 class SoilLayer:
     def __init__(
         self,
-        all_sprites: pygame.sprite.Sprite,
-        collision_sprites: pygame.sprite.Sprite,
+        all_sprites: CameraGroup,
+        collision_sprites: Group[Any],
         raining: bool,
     ) -> None:
         # sprite groups
-        self.all_sprites = all_sprites
-        self.collision_sprites = collision_sprites
-        self.soil_sprites = pygame.sprite.Group()
-        self.water_sprites = pygame.sprite.Group()
-        self.plant_sprites = pygame.sprite.Group()
+        self.all_sprites: CameraGroup = all_sprites
+        self.collision_sprites: Group[Any] = collision_sprites
+        self.soil_sprites: Group[SoilTile] = pygame.sprite.Group()
+        self.water_sprites: Group[WaterTile] = pygame.sprite.Group()
+        self.plant_sprites: Group[Plant] = pygame.sprite.Group()
 
-        self.raining = raining
+        self.raining: bool = raining
 
-        self.soil_surfs = import_folder_dict("graphics/images/soil")
-        self.water_surfs = import_folder("graphics/images/soil_water")
+        self.soil_surfs: dict[str, Surface] = import_folder_dict(
+            "graphics/images/soil"
+        )
+        self.water_surfs: list[Surface] = import_folder(
+            "graphics/images/soil_water"
+        )
 
         self.create_soil_grid()
         self.create_hit_rects()
 
-        self.soil_coords: List[Vector2] = []
+        self.soil_coords: list[list[float]] = []
 
         # sounds
         hoe_sound_path = get_path("../audio/hoe.wav")
-        self.hoe_sound = pygame.mixer.Sound(hoe_sound_path)
+        self.hoe_sound: Sound = pygame.mixer.Sound(hoe_sound_path)
         self.hoe_sound.set_volume(0.1)
 
         plant_sound_path = get_path("../audio/plant.wav")
-        self.plant_sound = pygame.mixer.Sound(plant_sound_path)
+        self.plant_sound: Sound = pygame.mixer.Sound(plant_sound_path)
         self.plant_sound.set_volume(0.2)
 
     def create_soil_grid(self) -> None:
@@ -124,15 +145,17 @@ class SoilLayer:
             ground.get_height() // TILE_SIZE,
         )
 
-        self.grid = [[[] for col in range(h_tiles)] for row in range(v_tiles)]
+        self.grid: list[list[list[Any]]] = [
+            [[] for _ in range(h_tiles)] for _ in range(v_tiles)
+        ]
         map_tmx = "graphics/data/map.tmx"
-        for x, y, _ in (
-            load_pygame(map_tmx).get_layer_by_name("Farmable").tiles()
+        for x, y, _ in (  # pyright: ignore[reportUnknownVariableType]
+            load_pygame(map_tmx).get_layer_by_name("Farmable").tiles()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
         ):
             self.grid[y][x].append("F")
 
     def create_hit_rects(self) -> None:
-        self.hit_rects = []
+        self.hit_rects: list[Rect] = []
         for index_row, row in enumerate(self.grid):
             for index_col, cell in enumerate(row):
                 if "F" in cell:
@@ -156,7 +179,7 @@ class SoilLayer:
                     if self.raining:
                         self.water_all()
 
-    def water(self, target_pos: Tuple[int, int]) -> None:
+    def water(self, target_pos: tuple[int, int] | Vector2) -> None:
         for soil_sprite in self.soil_sprites.sprites():
             if soil_sprite.rect.collidepoint(target_pos):
                 x = soil_sprite.rect.x // TILE_SIZE
@@ -191,7 +214,7 @@ class SoilLayer:
                 if "W" in cell:
                     cell.remove("W")
 
-    def check_watered(self, pos: Tuple[int, int]) -> None:
+    def check_watered(self, pos: tuple[int, int]) -> bool:
         x = pos[0] // TILE_SIZE
         y = pos[1] // TILE_SIZE
         cell = self.grid[y][x]
@@ -199,7 +222,7 @@ class SoilLayer:
         return is_watered
 
     def plant_seed(
-        self, target_pos: Tuple[int, int], seed: str, player: Player
+        self, target_pos: tuple[int, int] | Vector2, seed: str, player: Player
     ) -> None:
         for soil_sprite in self.soil_sprites.sprites():
             if soil_sprite.rect.collidepoint(target_pos):
@@ -232,51 +255,51 @@ class SoilLayer:
             for index_col, cell in enumerate(row):
                 if "X" in cell:
                     # tile options
-                    t = "X" in self.grid[index_row - 1][index_col]
-                    b = "X" in self.grid[index_row + 1][index_col]
-                    r = "X" in row[index_col + 1]
-                    l = "X" in row[index_col - 1]
+                    top = "X" in self.grid[index_row - 1][index_col]
+                    bottom = "X" in self.grid[index_row + 1][index_col]
+                    right = "X" in row[index_col + 1]
+                    left = "X" in row[index_col - 1]
 
                     tile_type = "o"
 
                     # all sides
-                    if all((t, r, b, l)):
+                    if all((top, right, bottom, left)):
                         tile_type = "x"
 
                     # horizontal tiles only
-                    if l and not any((t, r, b)):
+                    if left and not any((top, right, bottom)):
                         tile_type = "r"
-                    if r and not any((t, l, b)):
+                    if right and not any((top, left, bottom)):
                         tile_type = "l"
-                    if r and l and not any((t, b)):
+                    if right and left and not any((top, bottom)):
                         tile_type = "lr"
 
                     # vertical only
-                    if t and not any((r, l, b)):
+                    if top and not any((right, left, bottom)):
                         tile_type = "b"
-                    if b and not any((r, l, t)):
+                    if bottom and not any((right, left, top)):
                         tile_type = "t"
-                    if b and t and not any((r, l)):
+                    if bottom and top and not any((right, left)):
                         tile_type = "tb"
 
                     # corners
-                    if l and b and not any((t, r)):
+                    if left and bottom and not any((top, right)):
                         tile_type = "tr"
-                    if r and b and not any((t, l)):
+                    if right and bottom and not any((top, left)):
                         tile_type = "tl"
-                    if l and t and not any((b, r)):
+                    if left and top and not any((bottom, right)):
                         tile_type = "br"
-                    if r and t and not any((b, l)):
+                    if right and top and not any((bottom, left)):
                         tile_type = "bl"
 
                     # T shapes
-                    if all((t, b, r)) and not l:
+                    if all((top, bottom, right)) and not left:
                         tile_type = "tbr"
-                    if all((t, b, l)) and not r:
+                    if all((top, bottom, left)) and not right:
                         tile_type = "tbl"
-                    if all((l, r, t)) and not b:
+                    if all((left, right, top)) and not bottom:
                         tile_type = "lrb"
-                    if all((l, r, b)) and not t:
+                    if all((left, right, bottom)) and not top:
                         tile_type = "lrt"
 
                     SoilTile(

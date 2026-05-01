@@ -1,31 +1,26 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import (
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 import pygame
+
+if TYPE_CHECKING:
+    from pygame import Font, Surface
+    from pygame.sprite import Sprite
 
 T = TypeVar("T")
 
 
 @dataclass
 class TextStyle:
-    text_colour: Union[int, str, Sequence[int]]
-    text_bg_colour: Optional[Union[int, str, Sequence[int]]] = None
+    text_colour: int | str | Sequence[int]
+    text_bg_colour: None | int | str | Sequence[int] = None
     bold: bool = False
     italic: bool = False
-    font_name: Optional[Union[str, bytes]] = None
+    font_name: None | str | bytes = None
 
     def copy(self) -> TextStyle:
         return TextStyle(
@@ -38,18 +33,25 @@ class TextStyle:
 
 
 class Text:
-    __slots__ = ("window", "center", "text_style", "text_size", "font", "rect")
+    __slots__: tuple[str, ...] = (
+        "window",
+        "center",
+        "text_style",
+        "font",
+        "rect",
+    )
 
     def __init__(
         self,
-        window: pygame.Surface,
+        window: Surface,
         text_style: TextStyle,
         text_size: int,
-        center: Tuple[int, int],
+        center: tuple[int, int],
     ) -> None:
-        self.window = window
-        self.center = center
-        self.text_style = text_style
+        self.window: Surface = window
+        self.center: tuple[int, int] = center
+        self.text_style: TextStyle = text_style
+        self.font: Font
 
         if self.text_style.font_name:
             self.font = pygame.font.Font(self.text_style.font_name, text_size)
@@ -61,13 +63,13 @@ class Text:
                 self.text_style.italic,
             )
 
-        self.rect: Optional[pygame.Rect] = None
+        self.rect: None | pygame.Rect = None
 
     def render(
         self,
         text: str,
-        colour: Optional[Union[int, str, Sequence[int]]] = None,
-        text_bg_colour: Optional[Union[int, str, Sequence[int]]] = None,
+        colour: None | int | str | Sequence[int] = None,
+        text_bg_colour: None | int | str | Sequence[int] = None,
         antialias: bool = True,
     ) -> None:
         rendered_text = self.font.render(
@@ -84,23 +86,22 @@ class Text:
 class Animation:
     def __init__(
         self,
-        frames: Dict[str, List[pygame.Surface]],
+        frames: dict[str, list[pygame.Surface]],
         *,
-        start_status: Optional[str] = None,
-        sprite: Optional[pygame.sprite.Sprite] = None,
+        start_status: str,
+        sprite: None | pygame.sprite.Sprite = None,
         speed: int = 4,
         ignore_invalid_state: bool = True,
     ) -> None:
-        self.frames = frames
-        self.sprite = sprite
-        self.speed = speed
-        self.ignore_invalid_state = ignore_invalid_state
+        self.frames: dict[str, list[Surface]] = frames
+        self.sprite: Sprite | None = sprite
+        self.speed: int = speed
+        self.ignore_invalid_state: bool = ignore_invalid_state
 
-        self.status: Optional[str] = None
-        self.current_frame = 0
-        self.max_frames = 0
-        if start_status is not None:
-            self.set_status(start_status)
+        self.status: str = start_status
+        self.current_frame: float = 0
+        self.max_frames: int = 0
+        self.set_status(start_status)
 
     def get_frame(self, frame: int) -> pygame.Surface:
         return self.frames[self.status][frame]
@@ -117,7 +118,7 @@ class Animation:
             # self.current_frame = 0
             self.max_frames = len(self.frames[self.status]) - 1
 
-    def play_status(self, dt: int) -> pygame.Surface:
+    def play_status(self, dt: float) -> pygame.Surface:
         if not self.ignore_invalid_state:
             assert self.ignore_invalid_state or self.status is not None, (
                 "No animation state has been set to run"
@@ -129,7 +130,7 @@ class Animation:
 
         return self.frames[self.status][round(self.current_frame)]
 
-    def play_status_ip(self, dt: int) -> None:
+    def play_status_ip(self, dt: float) -> None:
         assert self.sprite is not None, (
             "No sprite has been passed to play the status in-place."
         )
@@ -140,21 +141,23 @@ class Animation:
 
 
 class Timer:
-    def __init__(self, duration: int, func: Optional[Callable] = None) -> None:
-        self.duration = duration
-        self.func = func
-        self.start_time = 0
-        self.active = False
+    def __init__(
+        self, duration: int, func: None | Callable[[], None] = None
+    ) -> None:
+        self.duration: int = duration
+        self.func: None | Callable[[], None] = func
+        self.start_time: int = 0
+        self.active: bool = False
 
-    def activate(self):
+    def activate(self) -> None:
         self.active = True
         self.start_time = pygame.time.get_ticks()
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         self.active = False
         self.start_time = 0
 
-    def update(self):
+    def update(self) -> None:
         current_time = pygame.time.get_ticks()
         if current_time - self.start_time >= self.duration:
             if self.func and self.start_time != 0:
@@ -163,12 +166,12 @@ class Timer:
 
 
 class ItemIterator(Generic[T]):
-    def __init__(self, seq: List[T]) -> None:
-        self.seq = seq
-        self.index = 0
-        self.selected = seq[0]
-        self.max_index = len(seq) - 1
-        self.inv: Dict[T, int] = {key: 1 for key in seq}
+    def __init__(self, seq: list[T]) -> None:
+        self.seq: list[T] = seq
+        self.index: int = 0
+        self.selected: T = seq[0]
+        self.max_index: int = len(seq) - 1
+        self.inv: dict[T, int] = {key: 1 for key in seq}
 
     def next(self) -> None:
         self.index += 1
@@ -192,7 +195,7 @@ class ItemIterator(Generic[T]):
         del self.inv[element]
         self.max_index -= 1
 
-    def update_item(self, amount: int = 1, item: Optional[T] = None) -> None:
+    def update_item(self, amount: int = 1, item: None | T = None) -> None:
         item = item or self.selected
         if item not in self.seq:
             self.append(item)
@@ -204,8 +207,9 @@ class ItemIterator(Generic[T]):
             self.append(item)
 
 
-def import_folder(path: str) -> List[pygame.Surface]:
-    surface_list = []
+def import_folder(path: str) -> list[Surface]:
+    surface_list: list[Surface] = []
+
     for folder, _, image_files in os.walk(path):
         for image in image_files:
             full_path = f"{folder}/{image}"
@@ -214,8 +218,8 @@ def import_folder(path: str) -> List[pygame.Surface]:
     return surface_list
 
 
-def import_folder_dict(path: str) -> dict:
-    surface_dict = {}
+def import_folder_dict(path: str) -> dict[str, Surface]:
+    surface_dict: dict[str, Surface] = {}
 
     for _, __, img_files in os.walk(path):
         for image in img_files:

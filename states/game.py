@@ -1,16 +1,19 @@
+from __future__ import annotations
+
 import os
 import random
+from typing import TYPE_CHECKING
 
 import pygame
-from game_state import State
-from pytmx.util_pygame import load_pygame
+from pytmx.util_pygame import (
+    load_pygame,  # pyright: ignore[reportUnknownVariableType]
+)
 
 from core.settings import (
     BACKGROUND_COLOUR,
     CHARACTER_ANIMATIONS,
     LAYERS,
     TILE_SIZE,
-    Display,
 )
 from core.utils import Animation, get_path, import_folder
 from entities.overlay import Overlay
@@ -27,34 +30,42 @@ from entities.sprites import (
 )
 from entities.trader import Trader
 from entities.transition import Transition
+from states.base import BaseState
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    from pygame.mixer import Sound
+    from pygame.sprite import Group
+    from pytmx import TiledMap
 
 
-class Game(State):
+class Game(BaseState):
     def __init__(self) -> None:
         super().__init__()
 
-        self.all_sprites = CameraGroup(State.window)  # type: ignore
-        self.collision_sprites = pygame.sprite.Group()
-        self.tree_sprites = pygame.sprite.Group()
-        self.interaction_sprites = pygame.sprite.Group()
+        self.all_sprites: CameraGroup = CameraGroup(BaseState.window)
+        self.collision_sprites: Group[Any] = pygame.sprite.Group()
+        self.tree_sprites: Group[Any] = pygame.sprite.Group()
+        self.interaction_sprites: Group[Any] = pygame.sprite.Group()
 
-        self.sky = Sky(State.window)
-        self.rain = Rain(State.window, self.all_sprites)  # type: ignore
-        self.raining = random.randint(0, 10) > 7
-        self.soil_layer = SoilLayer(
+        self.sky: Sky = Sky(display=BaseState.window)
+        self.rain: Rain = Rain(BaseState.window, self.all_sprites)
+        self.raining: bool = random.randint(0, 10) > 7
+        self.soil_layer: SoilLayer = SoilLayer(
             self.all_sprites, self.collision_sprites, self.raining
         )
 
-        self.player_animation = Animation(
+        self.player_animation: Animation = Animation(
             {
                 animation: import_folder(
                     f"{CHARACTER_ANIMATIONS}/{animation}/"
                 )
                 for animation in os.listdir(CHARACTER_ANIMATIONS)
-            }
+            },
+            start_status="down_idle",
         )
-        self.player_animation.set_status("down_idle")
-        self.player = Player(
+        self.player: Player = Player(
             (0, 0),
             self.player_animation,
             self.all_sprites,
@@ -63,27 +74,31 @@ class Game(State):
             self.interaction_sprites,
             self.soil_layer,
         )
-        self.trader = Trader(self.player)
+        self.trader: Trader = Trader(self.player)
 
-        self.transition = Transition(self.reset, self.player, State.window)
-        self.overlay = Overlay(self.player, State.window)  # type: ignore
-        self.tmx_data = load_pygame(get_path("../graphics/data/map.tmx"))
+        self.transition: Transition = Transition(
+            self.reset, self.player, BaseState.window
+        )
+        self.overlay: Overlay = Overlay(self.player, BaseState.window)
+        self.tmx_data: TiledMap = load_pygame(
+            get_path("../graphics/data/map.tmx")
+        )
 
         music_path = get_path("../audio/bg_music.mp3")
-        self.music = pygame.mixer.Sound(music_path)
+        self.music: Sound = pygame.mixer.Sound(music_path)
         self.music.set_volume(0.5)
         self.music.play(loops=-1)
 
         interact_sound_path = get_path("../audio/interact.wav")
-        self.interact_sound = pygame.mixer.Sound(interact_sound_path)
+        self.interact_sound: Sound = pygame.mixer.Sound(interact_sound_path)
         self.interact_sound.set_volume(0.2)
 
-        rain_path = get_path("../audio/rain.wav")
-        self.rain_sound = pygame.mixer.Sound(rain_path)
+        rain_path: str = get_path("../audio/rain.wav")
+        self.rain_sound: Sound = pygame.mixer.Sound(rain_path)
         self.rain_sound.set_volume(0.2)
-        self.rain_playing = False
+        self.rain_playing: bool = False
 
-    def setup(self) -> None:
+    def on_load(self, reload: bool) -> None:
         # World Map
         BaseSprite(
             (0, 0),
@@ -94,33 +109,36 @@ class Game(State):
             LAYERS["ground"],
         )
 
-        for obj in self.tmx_data.get_layer_by_name("Player"):
-            if obj.name == "Start":
-                self.player.position.x = obj.x
-                self.player.position.y = obj.y
+        # fmt: off
+        # The pytmx library doesn't have great typing support...
 
-            elif obj.name == "Bed":
+        for obj in self.tmx_data.get_layer_by_name("Player"):                      # pyright: ignore[reportGeneralTypeIssues, reportUnknownVariableType]
+            if obj.name == "Start":                                                     # pyright: ignore[reportUnknownMemberType]
+                self.player.position.x = obj.x                                          # pyright: ignore[reportUnknownMemberType]
+                self.player.position.y = obj.y                                          # pyright: ignore[reportUnknownMemberType]
+
+            elif obj.name == "Bed":                                                     # pyright: ignore[reportUnknownMemberType]
                 Interaction(
-                    (obj.x, obj.y),
-                    (obj.width, obj.height),
+                    (obj.x, obj.y),                                                 # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+                    (obj.width, obj.height),                                       # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
                     self.interaction_sprites,
                     LAYERS["main"],
                     obj.name,
                 )
 
-            elif obj.name == "Trader":
+            elif obj.name == "Trader":                                                 # pyright: ignore[reportUnknownMemberType]
                 Interaction(
-                    (obj.x, obj.y),
-                    (obj.width, obj.height),
+                    (obj.x, obj.y),                                                # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+                    (obj.width, obj.height),                                      # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
                     self.interaction_sprites,
                     LAYERS["main"],
                     obj.name,
                 )
 
         # Collision tiles
-        for x, y, _ in self.tmx_data.get_layer_by_name("Collision").tiles():
+        for x, y, _ in self.tmx_data.get_layer_by_name("Collision").tiles():      # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
             BaseSprite(
-                (x * TILE_SIZE, y * TILE_SIZE),
+                (x * TILE_SIZE, y * TILE_SIZE),                                    # pyright: ignore[reportUnknownArgumentType]
                 pygame.Surface((TILE_SIZE, TILE_SIZE)),
                 self.collision_sprites,
                 LAYERS["main"],
@@ -128,22 +146,22 @@ class Game(State):
 
         # House furnitures
         for layer in ("HouseFloor", "HouseFurnitureBottom"):
-            for x, y, surface in self.tmx_data.get_layer_by_name(
+            for x, y, surface in self.tmx_data.get_layer_by_name(                      # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
                 layer
-            ).tiles():
+            ).tiles():                                                                 # pyright: ignore[reportAttributeAccessIssue]
                 BaseSprite(
-                    (x * TILE_SIZE, y * TILE_SIZE),
-                    surface,
+                    (x * TILE_SIZE, y * TILE_SIZE),                                # pyright: ignore[reportUnknownArgumentType]
+                    surface,                                                      # pyright: ignore[reportUnknownArgumentType]
                     self.all_sprites,
                     LAYERS["house_bottom"],
                 )
         for layer in ("HouseWalls", "HouseFurnitureTop", "Fence"):
-            for x, y, surface in self.tmx_data.get_layer_by_name(
+            for x, y, surface in self.tmx_data.get_layer_by_name(                      # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
                 layer
-            ).tiles():
+            ).tiles():  # pyright: ignore[reportAttributeAccessIssue]
                 BaseSprite(
-                    (x * TILE_SIZE, y * TILE_SIZE),
-                    surface,
+                    (x * TILE_SIZE, y * TILE_SIZE),                                # pyright: ignore[reportUnknownArgumentType]
+                    surface,                                                      # pyright: ignore[reportUnknownArgumentType]
                     (
                         self.all_sprites
                         if layer != "Fence"
@@ -152,33 +170,35 @@ class Game(State):
                     LAYERS["main"],
                 )
 
-        for obj in self.tmx_data.get_layer_by_name("Trees"):
+        for obj in self.tmx_data.get_layer_by_name("Trees"):                      # pyright: ignore[reportGeneralTypeIssues, reportUnknownVariableType]
             Tree(
-                (obj.x, obj.y),
-                obj.image,
+                (obj.x, obj.y),                                                    # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+                obj.image,                                                        # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
                 [self.all_sprites, self.collision_sprites, self.tree_sprites],
                 LAYERS["main"],
-                obj.name,
+                obj.name,                                                              # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
                 self.all_sprites,
                 self.player,
             )
 
         # Decorations
-        for obj in self.tmx_data.get_layer_by_name("Decoration"):
+        for obj in self.tmx_data.get_layer_by_name("Decoration"):                 # pyright: ignore[reportGeneralTypeIssues, reportUnknownVariableType]
             Wildflower(
-                (obj.x, obj.y),
-                obj.image,
+                (obj.x, obj.y),                                                    # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+                obj.image,                                                        # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
                 [self.all_sprites, self.collision_sprites],
                 LAYERS["main"],
             )
 
         # Water
-        for x, y, surface in self.tmx_data.get_layer_by_name("Water").tiles():
+        for x, y, surface in self.tmx_data.get_layer_by_name("Water").tiles():    # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownVariableType]
             Water(
-                (x * TILE_SIZE, y * TILE_SIZE),
+                (x * TILE_SIZE, y * TILE_SIZE),                                    # pyright: ignore[reportUnknownArgumentType]
                 self.all_sprites,
                 LAYERS["water"],
             )
+
+        # fmt: on
 
     def plant_collision(self) -> None:
         if self.soil_layer.plant_sprites:
@@ -218,41 +238,31 @@ class Game(State):
 
         self.sky.start_color = [255, 255, 255]
 
-    def run(self) -> None:
-        while True:
-            dt = self.clock.tick(Display.FPS) / 1000
-            self.window.fill(BACKGROUND_COLOUR)
+    def process_update(self, dt: float) -> None:
+        self.window.fill(BACKGROUND_COLOUR)
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.manager.exit_game()
+        self.all_sprites.draw(self.player)
+        self.overlay.draw(dt=dt)
+        self.sky.display(dt=dt)
 
-            self.all_sprites.draw(self.player)
-            self.overlay.draw(dt=dt)
-            self.sky.display(dt=dt)
+        if self.player.toggle_active:
+            if self.raining:
+                self.rain.dim_screen()
+            self.trader.update()
+        else:
+            self.all_sprites.update(dt=dt)
+            self.plant_collision()
 
-            if self.player.toggle_active:
-                if self.raining:
-                    self.rain.dim_screen()
-                self.trader.update()
+            if self.raining:
+                if not self.rain_playing:
+                    self.rain_playing = True
+                    self.rain_sound.play(-1)
+                self.rain.update()
             else:
-                self.all_sprites.update(dt)
-                self.plant_collision()
+                self.rain_playing = False
+                self.rain_sound.stop()
 
-                if self.raining:
-                    if not self.rain_playing:
-                        self.rain_playing = True
-                        self.rain_sound.play(-1)
-                    self.rain.update()
-                else:
-                    self.rain_playing = False
-                    self.rain_sound.stop()
+            if self.player.sleep:
+                self.transition.run()
 
-                if self.player.sleep:
-                    self.transition.run()
-
-            pygame.display.update()
-
-
-def hook(**kwargs) -> None:
-    Game.manager.load_states(Game, **kwargs)
+        pygame.display.update()

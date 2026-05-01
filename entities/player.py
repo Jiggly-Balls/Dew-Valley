@@ -1,4 +1,6 @@
-from typing import Dict, Tuple
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pygame
 from pygame.sprite import Group
@@ -7,44 +9,54 @@ from core.settings import LAYERS, PLAYER_TOOL_OFFSET, Display
 from core.utils import Animation, ItemIterator, Timer, get_path
 from entities.sprites import BaseSprite
 
+if TYPE_CHECKING:
+    from typing import Any
+
+    from pygame import Surface
+    from pygame.math import Vector2
+    from pygame.mixer import Sound
+    from pygame.rect import Rect
+
+    from entities.soil import SoilLayer
+
 
 class Player(BaseSprite):
     def __init__(
         self,
-        pos: Tuple[int, int],
+        pos: tuple[int, int],
         animation: Animation,
-        group: Group,
-        collison_sprites: Group,
-        tree_sprites: Group,
-        interaction_sprites: Group,
-        soil_layer: Group,
+        group: Group[Any],
+        collison_sprites: Group[Any],
+        tree_sprites: Group[Any],
+        interaction_sprites: Group[Any],
+        soil_layer: SoilLayer,
     ) -> None:
         super().__init__(pos, animation.get_frame(0), group, LAYERS["main"])
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = self.rect.copy().inflate((-126, -70))
+        self.rect: Rect = self.image.get_rect(center=pos)
+        self.hitbox: Rect = self.rect.copy().inflate((-126, -70))
 
-        self.collision_sprites = collison_sprites
-        self.tree_sprites = tree_sprites
-        self.interaction_sprites = interaction_sprites
-        self.soil_layer = soil_layer
+        self.collision_sprites: Group[Any] = collison_sprites
+        self.tree_sprites: Group[Any] = tree_sprites
+        self.interaction_sprites: Group[Any] = interaction_sprites
+        self.soil_layer: SoilLayer = soil_layer
 
-        self.animation = animation
-        self.sleep = False
+        self.animation: Animation = animation
+        self.sleep: bool = False
 
-        self.speed = 300
-        self.position = pygame.math.Vector2(self.rect.center)
-        self.direction = pygame.math.Vector2()
-        self.direction_str = "down"
+        self.speed: int = 300
+        self.position: Vector2 = pygame.math.Vector2(self.rect.center)
+        self.direction: Vector2 = pygame.math.Vector2()
+        self.direction_str: str = "down"
 
-        self.inventory = ItemIterator(
+        self.inventory: ItemIterator[str] = ItemIterator(
             ["hoe", "axe", "water", "corn", "tomato", "wood", "apple"]
         )
         self.inventory.set_item("corn", 5)
         self.inventory.set_item("tomato", 5)
-        self.money = 50
+        self.money: int = 50
 
-        self.toggle_active = False
-        self.timers: Dict[str, Timer] = {
+        self.toggle_active: bool = False
+        self.timers: dict[str, Timer] = {
             "interact": Timer(50, self.interact),
             "tool_use": Timer(500, self.use_tool),
             "tool_switch": Timer(200),
@@ -52,7 +64,7 @@ class Player(BaseSprite):
         }
 
         watering_sound_path = get_path("../audio/water.mp3")
-        self.watering = pygame.mixer.Sound(watering_sound_path)
+        self.watering: Sound = pygame.mixer.Sound(watering_sound_path)
         self.watering.set_volume(0.2)
 
     def get_target_pos(self) -> pygame.Vector2:
@@ -75,7 +87,7 @@ class Player(BaseSprite):
             self.timers["seed_use"].activate()
             self.direction = pygame.math.Vector2()
 
-    def use_seed(self):
+    def use_seed(self) -> None:
         if self.inventory.inv[self.inventory.selected] > 0:
             self.soil_layer.plant_seed(
                 self.get_target_pos(), self.inventory.selected, self
@@ -105,7 +117,7 @@ class Player(BaseSprite):
                     self.animation.set_status("idle_left")
                     self.sleep = True
 
-    def input(self, dt: int) -> None:
+    def input(self, dt: float) -> None:
         # User input system
         if not self.timers["tool_use"].active and not self.sleep:
             keys = pygame.key.get_pressed()
@@ -194,21 +206,21 @@ class Player(BaseSprite):
         for timer in self.timers.values():
             timer.update()
 
-    def update(self, dt: int) -> None:
+    def update(self, dt: float) -> None:
         self.input(dt=dt)
         # self.use_tool()
         self.update_timers()
         self.get_target_pos()
-        self.image = self.animation.play_status(dt=dt)
+        self.image: Surface = self.animation.play_status(dt=dt)
 
 
-class CameraGroup(Group):
-    def __init__(self, window: pygame.Surface):
+class CameraGroup(Group[BaseSprite]):
+    def __init__(self, window: Surface) -> None:
         super().__init__()
-        self.window = window
-        self.offset = pygame.math.Vector2()
+        self.window: Surface = window
+        self.offset: Vector2 = pygame.math.Vector2()
 
-    def draw(self, player: Player) -> None:
+    def draw(self, player: Player) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         self.offset.x = player.rect.centerx - Display.SCREEN_RESOLUTION[0] / 2
         self.offset.y = player.rect.centery - Display.SCREEN_RESOLUTION[1] / 2
 

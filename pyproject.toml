@@ -1,13 +1,20 @@
 [project]
 name = "dew-valley"
-version = "0.1.0"
+version = "2.1.0b"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["game-state==1.1.1", "pygame-ce>=2.5.6", "pytmx>=3.32"]
+dependencies = [
+    "game-state==2.4.0",
+    "pygame-ce>=2.5.6",
+    "pytmx>=3.32",
+]
 
 [dependency-groups]
-dev = ["ruff>=0.14.3"]
+dev = [
+    "basedpyright>=1.37.1",
+    "ruff>=0.14.3",
+]
 
 [tool.ruff]
 line-length = 79
@@ -20,3 +27,26 @@ quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 docstring-code-line-length = 72
+
+[tool.basedpyright]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    "venv/",
+    "build/",
+    "dist/",
+    "local/",
+    "examples/",
+    "docs/",
+    "lib_testing/",
+]
+reportImportCycles = false
+reportUnnecessaryIsInstance = false
+reportImplicitStringConcatenation = false
+reportUnusedCallResult = false
+reportMissingTypeStubs = false
+reportAny = false
+reportExplicitAny = false
+reportImplicitOverride = false
+reportUnusedParameter = false
