@@ -1,7 +1,7 @@
 [project]
 name = "dew-valley"
 version = "2.0.0"
-description = "Add your description here"
+description = "A stardew valley rip off made in Python using Pygame"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
