@@ -130,7 +130,7 @@ class Animation:
 
         return self.frames[self.status][round(self.current_frame)]
 
-    def play_status_ip(self, dt: int) -> None:
+    def play_status_ip(self, dt: float) -> None:
         assert self.sprite is not None, (
             "No sprite has been passed to play the status in-place."
         )

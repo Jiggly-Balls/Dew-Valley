@@ -74,7 +74,7 @@ class Particle(BaseSprite):
         new_surf.set_colorkey((0, 0, 0))
         self.image: Surface = new_surf
 
-    def update(self) -> None:
+    def update(self, dt: float) -> None:
         current_time = pygame.time.get_ticks()
         if current_time - self.start_time > self.duration:
             self.kill()
@@ -91,7 +91,7 @@ class Water(BaseSprite):
         )
         super().__init__(pos, self.animation.get_frame(0), group, z)
 
-    def update(self, dt: int) -> None:
+    def update(self, dt: float) -> None:
         self.animation.play_status_ip(dt=dt)
 
 
