@@ -19,9 +19,7 @@ if TYPE_CHECKING:
 
     from entities.player import CameraGroup, Player
 
-    GroupParam: TypeAlias = (
-        pygame.sprite.Group[Any] | Sequence[pygame.sprite.Group[Any]]
-    )
+    GroupParam: TypeAlias = Group[Any] | Sequence[Group[Any]]
 
 
 class BaseSprite(pygame.sprite.Sprite):
