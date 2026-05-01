@@ -19,7 +19,8 @@ https://github.com/user-attachments/assets/6ef84cba-6d3a-4eac-a092-4c03960c7484
 
 ## Running via Source
 
-To run the game locally from source you will require python version `3.11` or higher and `uv` project manager.
+To run the game locally from source you will require the `uv` project manager.
+You can look for it's installation instruction [here](https://docs.astral.sh/uv/getting-started/installation/).
 
 Setup the local environment by running the following command in your terminal-
 ```
