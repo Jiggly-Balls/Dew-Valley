@@ -1,4 +1,0 @@
-pygame-ce==2.5.0
-black==24.4.2
-pytmx==3.32
-game_state==1.1.1
