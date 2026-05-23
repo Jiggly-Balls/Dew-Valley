@@ -13,6 +13,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "basedpyright>=1.37.1",
+    "nuitka>=4.1.1",
     "ruff>=0.14.3",
 ]
 
